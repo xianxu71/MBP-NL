@@ -270,7 +270,7 @@ class dipole:
     
        """
        nk, nz, nb_coarse, _ = overlap.shape
-       dipole = np.zeros([nk, nb_coarse, nb_coarse, 3], dtype=np.complex)
+       dipole = np.zeros([nk, nb_coarse, nb_coarse, 3], dtype=np.complex128)
     
        # I-V derivative
        fac = 1j/(4*np.pi)
@@ -303,8 +303,8 @@ class dipole:
        """
        ns, nk, nz, nband, _ = overlap.shape
     
-       Sinv = np.zeros([ns,nk,nz,nband,nband], dtype=np.complex)
-       cov_ovlap = np.zeros([ns,nk,nz,nband,nband], dtype=np.complex)
+       Sinv = np.zeros([ns,nk,nz,nband,nband], dtype=np.complex128)
+       cov_ovlap = np.zeros([ns,nk,nz,nband,nband], dtype=np.complex128)
     
        for js in range(ns):
          for ik in range(nk):
@@ -391,8 +391,8 @@ class dipole:
      
        """
        nk, nz, nband, _ = overlap.shape
-       S = np.zeros([nk,nz,nband,nband], dtype=np.complex)
-       cov_ovlap = np.zeros([nk,nz,nband,nband], dtype=np.complex)
+       S = np.zeros([nk,nz,nband,nband], dtype=np.complex128)
+       cov_ovlap = np.zeros([nk,nz,nband,nband], dtype=np.complex128)
     
        # U = |  <u1k | u1kq>  <u1k | u2kq> |  S = |  1 / <u1k|u1kq>  1 / <u2k|u2kq> |
        #     |  <u2k | u1kq>  <u2k | u2kq> |      |  1 / <u1k|u1kq>  1 / <u2k|u2kq> |

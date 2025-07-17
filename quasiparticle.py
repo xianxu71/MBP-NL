@@ -109,14 +109,14 @@ class quasiparticle:
              raise Exception('Number of requested bands exceed that in the file.')
 
             dim = np.array([self.nspin, self.nspinor, self.mnband,\
-                            self.nvb, self.ncb], dtype=int)
+                            self.nvb, self.ncb], dtype=np.int32)
 
        else: # rank != 0
 
           self.celvol = None
-          dim = np.empty(5, dtype=np.int)
-          self.alat = np.empty(1, dtype=np.float)
-          self.avec = np.empty([3,3], dtype=np.float)
+          dim = np.empty(5, dtype=np.int32)
+          self.alat = np.empty(1, dtype=np.float64)
+          self.avec = np.empty([3,3], dtype=np.float64)
          
        self.celvol = comm.bcast(self.celvol)
        comm.Bcast([dim, MPI.INT])
@@ -202,7 +202,7 @@ class quasiparticle:
                 raise Exception('  Numbers of spin up and down band differ.')
 
             # find eqp on reduced grid
-            rktoeqpk = -1*np.ones(nrk, dtype=int)
+            rktoeqpk = -1*np.ones(nrk, dtype=np.int32)
             for i in range(nrk):
               for j in range(nk):
                 if np.linalg.norm( self.kpoint.k_range(eqpkpt[j]) \
@@ -237,14 +237,14 @@ class quasiparticle:
                 idx = list(range(nvb_q-1,nbot,-1)) + list(range(nvb_q, self.ncb+nvb_q))
                 self.eqpcorr[js,i,:] = eqpcorr[i,idx]
 
-            dim = np.array([nrk, self.ncb + self.nvb])
+            dim = np.array([nrk, self.ncb + self.nvb], dtype=np.int32)
          else:
-            dim = np.empty(2, dtype=np.int)
+            dim = np.empty(2, dtype=np.int32)
 
          comm.Bcast([dim, MPI.INT])
         
          if rank != 0:
-            self.eqpcorr = np.empty([self.nspin,dim[0],dim[1]], dtype=np.float)
+            self.eqpcorr = np.empty([self.nspin,dim[0],dim[1]], dtype=np.float64)
      
          comm.Bcast([self.eqpcorr, MPI.DOUBLE])
        else:

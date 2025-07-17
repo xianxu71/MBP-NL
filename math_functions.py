@@ -91,7 +91,7 @@ def hilbert_transform(Im, omega_in, omega_out, eta=0.01):
         The real part of the object.
 
     """
-    Re = np.zeros(omega_out.shape, dtype=np.float)
+    Re = np.zeros(omega_out.shape, dtype=np.float64)
 
     di = omega_in[1] - omega_in[0]
     oo = omega_out

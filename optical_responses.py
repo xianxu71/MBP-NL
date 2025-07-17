@@ -653,7 +653,7 @@ class optical_responses:
 
       for j_loc,j in enumerate(self.exciton.my_xcts):
 
-        if rank == 0 and j_loc%int(self.exciton.my_nxct/10) == 0:
+        if rank == 0 and j_loc%int(self.exciton.my_nxct/1) == 0:
           print('  Progress: {0:4.1f}%'.format(j_loc/self.exciton.my_nxct*100))
 
         for i in range(self.exciton.nevecs):

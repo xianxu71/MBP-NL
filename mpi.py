@@ -19,7 +19,7 @@ def get_gsize_offset(nrk, dim):
 
    # Store size of density matrix for every local workers
    # then compute the offsets
-   gsizes = np.zeros(size)
+   gsizes = np.zeros(size, dtype=np.int32)
    for j in range(size):
      for i in range(max_nkpt_per_worker):
         ikpt = j * max_nkpt_per_worker + i
@@ -31,7 +31,7 @@ def get_gsize_offset(nrk, dim):
   
    # FIX: assume always use complex
    gsizes = gsizes* dim * 2
-   offsets = np.zeros(size)
+   offsets = np.zeros(size, np.int32)
    offsets[1:] = np.cumsum(gsizes)[:-1]
 
    #for i in range(size):

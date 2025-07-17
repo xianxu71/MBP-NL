@@ -195,7 +195,7 @@ class w90parser:
            print(self.nb, nband)
            raise Exception("nband from header does not match")
     
-         overlap = np.zeros([nk, nz, nband, nband], dtype=np.complex)
+         overlap = np.zeros([nk, nz, nband, nband], dtype=np.complex128)
          knbind = np.zeros([nk,nz], dtype=int)
       
          lines = f.readlines()
@@ -255,7 +255,7 @@ class w90parser:
           print(self.nb, nband)
           raise Exception("nband from header does not match")
 
-        overlap = np.zeros([nk, nz, nband, nband], dtype=np.complex)
+        overlap = np.zeros([nk, nz, nband, nband], dtype=np.complex128)
         knbind = np.zeros([nk,nz], dtype=int)
       
         for i in range(nk):
@@ -386,7 +386,7 @@ class w90parser:
          print( '\n  Reading dipole matrix from', d_fname)
          print( '    Header info: nk={0:d} nband={1:d}'.format(nk, nband))
     
-      dipole = np.zeros([nk, nband, nband, 3], dtype=np.complex)
+      dipole = np.zeros([nk, nband, nband, 3], dtype=np.complex128)
     
       for i, idir in enumerate(dirs):
         d_fname = seed_name + '-AA_'+ idir+ '.dat'
@@ -433,7 +433,7 @@ class w90parser:
          print( '\n Reading general derivative of dipole matrix from', d_fname)
          print( '  Header info: nk={0:d} nband={1:d}'.format(nk, nband))
     
-      gdiv_dipole = np.zeros([nk, nband, nband, 3, 3], dtype=np.complex)
+      gdiv_dipole = np.zeros([nk, nband, nband, 3, 3], dtype=np.complex128)
     
       for i, idir in enumerate(dirs):
        for j, jdir in enumerate(dirs):

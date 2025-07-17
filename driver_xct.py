@@ -11,13 +11,13 @@ if __name__ == '__main__':
 
    nvband = 6
    ncband = 6
-   nxct = 10000
+   nxct = 2000
    
-   wfn_name = 'wfn.h5'
-   seed_name = 'GeS'
-   eqp_fname = 'eqp.dat'
+   wfn_name = '../input/wfn.h5'
+   seed_name = '../input/GeS'
+   eqp_fname = '../input/eqp.dat'
    dmat_fname = None
-   xct_fname = 'eigenvectors.h5'
+   xct_fname = '../input/eigenvectors.h5'
    
    QP = quasiparticle.quasiparticle(\
                 nvband, ncband, wfn_name, seed_name, eqp_fname, dmat_fname)
@@ -29,7 +29,7 @@ if __name__ == '__main__':
    dw = 0.01  
    omega = np.arange(wmin,wmax+dw,dw)
 
-   eta = 0.05
+   eta = 0.1
    tetra = False
    brdfun = 'Lorentzian'
    
@@ -44,7 +44,7 @@ if __name__ == '__main__':
    #op.calc_nlo_conductivity(type='T-LPL')
    #op.calc_Jdos()
 
-   #op.calc_absorption_with_eh()
+   op.calc_absorption_with_eh()
    #op.calc_shift_current_with_eh()
    
    end = time.time()

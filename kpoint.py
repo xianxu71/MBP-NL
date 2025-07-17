@@ -41,14 +41,14 @@ class kpoint:
            self.ntran = root.get('mf_header/symmetry/ntran')[()]
            self.tnp = root.get('mf_header/symmetry/tnp')[()]
         
-           dim = np.array([self.nrk, self.ntran], dtype=int)
+           dim = np.array([self.nrk, self.ntran], dtype=np.int32)
 
        else: # rank != 0
 
-          dim = np.empty(2, dtype=np.int)
-          self.blat = np.empty(1, dtype=np.float)
-          self.bvec = np.empty([3,3], dtype=np.float)
-          self.bdot = np.empty([3,3], dtype=np.float)
+          dim = np.empty(2, dtype=np.int32)
+          self.blat = np.empty(1, dtype=np.float64)
+          self.bvec = np.empty([3,3], dtype=np.float64)
+          self.bdot = np.empty([3,3], dtype=np.float64)
           self.kgrid = np.empty([3], dtype=np.int32)
          
        comm.Bcast([dim, MPI.INT])
@@ -88,7 +88,7 @@ class kpoint:
 
             dim = np.array([self.nbk], dtype=int)
        else: # rank != 0
-          dim = np.empty(1, dtype=np.int)
+          dim = np.empty(1, dtype=np.int32)
 
        comm.Bcast([dim, MPI.INT])
 

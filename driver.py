@@ -11,9 +11,9 @@ if __name__ == '__main__':
    nvband = 6
    ncband = 6
    
-   wfn_name = 'wfn.h5'
-   seed_name = 'GeS'
-   eqp_fname = 'eqp.dat'
+   wfn_name = '../input/wfn.h5'
+   seed_name = '../input/GeS'
+   eqp_fname = '../input/eqp.dat'
    dmat_fname = None
    
    QP = quasiparticle.quasiparticle(\
@@ -24,7 +24,7 @@ if __name__ == '__main__':
    dw = 0.01  
    omega = np.arange(wmin,wmax+dw,dw)
 
-   eta = 0.01
+   eta = 0.1
    tetra = False
    brdfun = 'Gaussian'
    
