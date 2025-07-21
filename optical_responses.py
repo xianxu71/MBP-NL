@@ -699,6 +699,112 @@ class optical_responses:
    
       return
 
+   def calc_SHG_with_eh(self, fname='xct-shift_current'):
+      """
+      Ref. : Pedersen, PRB 92, 235432
+             Taghizadeh and Pedersen, PRB 97, 205432   
+   
+      Shift current with excitonic effects
+   
+      evals : exciton energy, index evals[n]
+      evecs : exciton wf Psi^(n)_cvk, index evecs[kcv,n] 
+      xeh  : dipole in exciton picture
+      veh  : velocity in exciton picture
+             xeh_n = Psi^(n)_cvk * r_vck
+
+      # Implementation 1 
+      !! Mix circular and linear polarized components
+      sigma0_i = sigma0_i\
+                  + np.einsum('abc,w->abcw', num1,\
+                                 1./(evals[i]*(evals[j]-(wrange+1j*eta))))\
+                  + np.einsum('abc,w->abcw', num2,\
+                                 1./(evals[i]*(evals[j]+(wrange+1j*eta))))
+   
+      Pij = 1j*(evals[i]-evals[j])*Xij
+      num1 = np.einsum('a,bc->abc', xeh[i],\
+                 np.einsum('b,c->bc', xeh[j].conjugate(), Pij))
+   
+      sigma0_e = sigma0_e\
+                  - np.einsum('abc,w->abcw', num1,\
+                  1./((evals[i]+(wrange+1j*eta)*(evals[j]+(wrange+1j*eta)))))
+
+      sigma0_e = comm.allreduce(sigma0_e)
+      sigma0_i = comm.allreduce(sigma0_i)
+      sigma0 = -sigma0_i + sigma0_e
+   
+      """
+      celvol = self.QP.celvol
+      ns = self.sdeg
+      nfk = self.QP.kpoint.nrk
+      xctdim = self.exciton.xdim
+      nevecs = self.exciton.nevecs
+      evecs = self.exciton.evecs
+      evals = self.exciton.evals
+      peh = self.exciton.veh
+      xeh = self.exciton.reh
+
+      eta = self.eta / Ry2eV
+      wrange = self.w / Ry2eV
+      brdf = self.brdfunc
+
+      pref = -eRy**3 / (2*nfk * celvol)
+      pref2 = eRy**3 / (2*nfk * celvol)
+
+      # use PRB 97, 205432
+      #sigma0_e = np.zeros([3, 3, 3, len(wrange)], dtype=complex)
+      #sigma0_i = np.zeros([3, 3, 3, len(wrange)], dtype=complex)
+      sigma0 = np.zeros([3, 3, 3, len(wrange)], dtype=complex)
+
+      Dpsi = self.compute_dpsi()
+
+      for j_loc,j in enumerate(self.exciton.my_xcts):
+
+        if rank == 0 and j_loc%int(self.exciton.my_nxct/1) == 0:
+          print('  Progress: {0:4.1f}%'.format(j_loc/self.exciton.my_nxct*100))
+
+        for i in range(self.exciton.nevecs):
+
+          Qij = 1j*np.dot(evecs[i].conjugate().flatten(), Dpsi[j_loc])
+          #Qij = self.QP.dp.computeQ(evecs[i], evecs[j])
+          Yij = self.QP.dp.computeR(evecs[i], evecs[j])
+          Xij = Qij + Yij
+
+          # Intraband velocity
+          Pij = self.QP.dp.computeP(evecs[i], evecs[j], self.QP.eqpk, eta, dephase=True)
+  
+          num1 = np.einsum('a,bc->abc', peh[i],\
+                     np.einsum('b,c->bc', Xij, xeh[j].conjugate()))
+          num2 = num1.conjugate()
+
+          num3 = np.einsum('b,ac->abc', xeh[i].conjugate(),\
+                     np.einsum('a,c->ac', Pij, xeh[j]))
+          num4 = num3.conjugate()
+
+
+          # Implementation 2
+          sigma0 = sigma0 + pref*1j*np.pi/evals[i]*(\
+                    -np.einsum('abc,w->abcw',num1,brdf(wrange, evals[j], eta))
+                    +np.einsum('abc,w->abcw',num2,brdf(wrange, -evals[j], eta))
+                    -np.einsum('acb,w->abcw',num1,brdf(wrange, -evals[j], eta))
+                    +np.einsum('acb,w->abcw',num2,brdf(wrange, evals[j], eta)))\
+                    + pref2*1j*np.pi*(\
+                    +np.einsum('abc,w->abcw',num3,brdf(wrange, evals[j], eta)*(1./(wrange-evals[i]+1j*eta)).real) 
+                    -np.einsum('abc,w->abcw',num3,brdf(wrange, evals[i], eta)*(1./(wrange-evals[j]-1j*eta)).real) 
+                    -np.einsum('acb,w->abcw',num4,brdf(wrange, -evals[j], eta)*(1./(wrange+evals[i]-1j*eta)).real) 
+                    +np.einsum('acb,w->abcw',num4,brdf(wrange, -evals[i], eta)*(1./(wrange+evals[j]+1j*eta)).real))
+
+      sigma0 = comm.allreduce(sigma0)
+   
+      # write shift current spectrum
+      if rank == 0:
+        for i,d1 in enumerate(['x','y','z']): 
+         for j,d2 in enumerate(['x','y','z']): 
+          for l,d3 in enumerate(['x','y','z']): 
+           tmp = fname + '-' + d1 + d2 + d3 + '.txt'
+           IO.write_shiftcurrent(tmp, wrange*Ry2eV, sigma0[i,j,l]*au2muAdivV2)
+   
+      return
+
 
    def compute_dpsi(self):
       """
