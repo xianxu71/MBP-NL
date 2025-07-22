@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
    nvband = 6
    ncband = 6
-   nxct = 2000
+   nxct = 300
    
    wfn_name = '../input/wfn.h5'
    seed_name = '../input/GeS'
@@ -29,7 +29,7 @@ if __name__ == '__main__':
    dw = 0.01  
    omega = np.arange(wmin,wmax+dw,dw)
 
-   eta = 0.1
+   eta = 0.05
    tetra = False
    brdfun = 'Lorentzian'
    
@@ -44,8 +44,9 @@ if __name__ == '__main__':
    #op.calc_nlo_conductivity(type='T-LPL')
    #op.calc_Jdos()
 
-   op.calc_absorption_with_eh()
+   #op.calc_absorption_with_eh()
    #op.calc_shift_current_with_eh()
+   op.calc_SHG_with_eh()
    
    end = time.time()
    

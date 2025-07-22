@@ -671,11 +671,11 @@ class optical_responses:
           num2 = num1.conjugate()
 
           num3 = np.einsum('b,ac->abc', xeh[i].conjugate(),\
-                     np.einsum('a,c->ac', Pij, xeh[j]))
+                     np.einsum('a,c->ac', Pij, xeh[j]))     
           num4 = num3.conjugate()
 
 
-          # Implementation 2
+          #Implementation 2
           sigma0 = sigma0 + pref*1j*np.pi/evals[i]*(\
                     -np.einsum('abc,w->abcw',num1,brdf(wrange, evals[j], eta))
                     +np.einsum('abc,w->abcw',num2,brdf(wrange, -evals[j], eta))
@@ -686,7 +686,7 @@ class optical_responses:
                     -np.einsum('abc,w->abcw',num3,brdf(wrange, evals[i], eta)*(1./(wrange-evals[j]-1j*eta)).real) 
                     -np.einsum('acb,w->abcw',num4,brdf(wrange, -evals[j], eta)*(1./(wrange+evals[i]-1j*eta)).real) 
                     +np.einsum('acb,w->abcw',num4,brdf(wrange, -evals[i], eta)*(1./(wrange+evals[j]+1j*eta)).real))
-
+          
       sigma0 = comm.allreduce(sigma0)
    
       # write shift current spectrum
@@ -699,7 +699,7 @@ class optical_responses:
    
       return
 
-   def calc_SHG_with_eh(self, fname='xct-shift_current'):
+   def calc_SHG_with_eh(self, fname='xct-SHG'):
       """
       Ref. : Pedersen, PRB 92, 235432
              Taghizadeh and Pedersen, PRB 97, 205432   
@@ -780,18 +780,29 @@ class optical_responses:
                      np.einsum('a,c->ac', Pij, xeh[j]))
           num4 = num3.conjugate()
 
+          # sigma0 = sigma0 + pref*1j*np.pi/evals[i]*(\
+          #           -np.einsum('abc,w->abcw',num1,brdf(wrange, evals[j], eta))
+          #           +np.einsum('abc,w->abcw',num2,brdf(wrange, -evals[j], eta))
+          #           -np.einsum('acb,w->abcw',num1,brdf(wrange, -evals[j], eta))
+          #           +np.einsum('acb,w->abcw',num2,brdf(wrange, evals[j], eta)))\
+          #           + pref2*1j*np.pi*(\
+          #           +np.einsum('abc,w->abcw',num3,brdf(wrange, evals[j], eta)*(1./(wrange-evals[i]+1j*eta)).real) 
+          #           -np.einsum('abc,w->abcw',num3,brdf(wrange, evals[i], eta)*(1./(wrange-evals[j]-1j*eta)).real) 
+          #           -np.einsum('acb,w->abcw',num4,brdf(wrange, -evals[j], eta)*(1./(wrange+evals[i]-1j*eta)).real) 
+          #           +np.einsum('acb,w->abcw',num4,brdf(wrange, -evals[i], eta)*(1./(wrange+evals[j]+1j*eta)).real))
 
           # Implementation 2
-          sigma0 = sigma0 + pref*1j*np.pi/evals[i]*(\
-                    -np.einsum('abc,w->abcw',num1,brdf(wrange, evals[j], eta))
-                    +np.einsum('abc,w->abcw',num2,brdf(wrange, -evals[j], eta))
-                    -np.einsum('acb,w->abcw',num1,brdf(wrange, -evals[j], eta))
-                    +np.einsum('acb,w->abcw',num2,brdf(wrange, evals[j], eta)))\
-                    + pref2*1j*np.pi*(\
-                    +np.einsum('abc,w->abcw',num3,brdf(wrange, evals[j], eta)*(1./(wrange-evals[i]+1j*eta)).real) 
-                    -np.einsum('abc,w->abcw',num3,brdf(wrange, evals[i], eta)*(1./(wrange-evals[j]-1j*eta)).real) 
-                    -np.einsum('acb,w->abcw',num4,brdf(wrange, -evals[j], eta)*(1./(wrange+evals[i]-1j*eta)).real) 
-                    +np.einsum('acb,w->abcw',num4,brdf(wrange, -evals[i], eta)*(1./(wrange+evals[j]+1j*eta)).real))
+          sigma0 = sigma0 + pref2*1j/2*np.pi*(\
+                    +np.einsum('abc,w->abcw',num1,brdf(wrange, evals[j], eta))*((1./(wrange-evals[i]/2+1j*eta)).real)
+                    -np.einsum('abc,w->abcw',num1,brdf(wrange, evals[i]/2, eta))*((1./(wrange-evals[j]-1j*eta)).real)
+                    +np.einsum('abc,w->abcw',num2,brdf(wrange, -evals[j], eta))*((1./(wrange+evals[i]/2+1j*eta)).real)
+                    -np.einsum('abc,w->abcw',num2,brdf(wrange, -evals[i]/2, eta))*((1./(wrange+evals[j]-1j*eta)).real)
+                    -np.einsum('acb,w->abcw',num1,brdf(wrange, -evals[j], eta))*((1./(wrange+evals[i]/2-1j*eta)).real)
+                    +np.einsum('acb,w->abcw',num1,brdf(wrange, -evals[i]/2, eta))*((1./(wrange+evals[j]+1j*eta)).real)
+                    -np.einsum('acb,w->abcw',num2,brdf(wrange, evals[j], eta))*((1./(wrange-evals[i]/2-1j*eta)).real)
+                    +np.einsum('acb,w->abcw',num2,brdf(wrange, evals[i]/2, eta))*((1./(wrange-evals[j]+1j*eta)).real)) 
+
+
 
       sigma0 = comm.allreduce(sigma0)
    
